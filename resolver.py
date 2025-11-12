@@ -53,9 +53,14 @@ while True:
         ip, port = ip_or_ns.split(":")
         port = int(port)
         s.sendto(domain.encode(), (ip, port))
+        # debug print
+        print(f"Forwarding NS query '{domain}' to {ip}:{port}")
         # Receive the response from the next server in the chain
         response_bytes, _ = s.recvfrom(1024)
         response = response_bytes.decode()
+        if response == "non-existent domain":
+        # stop the process if non-existent domain is received
+            break
         fields = response.split(",")
         record_type = fields[0]
         ip_or_ns = fields[1]
