@@ -15,13 +15,13 @@ s.bind(('', myport))
 cache={}
 #key=domain
 # value = (response_string, expiration_time)
-print(f"Resolver running on port {myport}, forwarding to {parentIP}:{parentPort}")
+# print(f"Resolver running on port {myport}, forwarding to {parentIP}:{parentPort}")
 
 while True:
     # Receive a domain query from the client
     domain_bytes, client_addr = s.recvfrom(1024)
     domain = domain_bytes.decode().strip()
-    print(f"Received query from client: {domain}")
+    # print(f"Received query from client: {domain}")
     if domain in cache:
         expire_time, res=cache[domain]
         if(time.time()<expire_time):
@@ -40,13 +40,13 @@ while True:
         # if domain not found, cache the negative response
         cache[domain] = (time.time() + x, response)
         s.sendto(response.encode(), client_addr)
-        print(f"Sent response to client: {response}")
+        # print(f"Sent response to client: {response}")
         continue
 
     fields = response.split(",")
-    record_type = fields[0]   # Record type: A or NS
+    domain_name = fields[0]   # The relevant domain
     ip_or_ns = fields[1]      # IP address or NS address
-    domain_name = fields[2]   # The relevant domain
+    record_type = fields[2]   #  Record type: A or NS
 
     # Handle NS records: forward the query to the server specified in the NS record
     while record_type == "NS":
@@ -54,7 +54,7 @@ while True:
         port = int(port)
         s.sendto(domain.encode(), (ip, port))
         # debug print
-        print(f"Forwarding NS query '{domain}' to {ip}:{port}")
+        # print(f"Forwarding NS query '{domain}' to {ip}:{port}")
         # Receive the response from the next server in the chain
         response_bytes, _ = s.recvfrom(1024)
         response = response_bytes.decode()
@@ -68,4 +68,4 @@ while True:
     # Send the final response back to the client
     cache[domain]=(time.time()+x, response)
     s.sendto(response.encode(), client_addr)
-    print(f"Sent response to client: {response}")
+    # print(f"Sent response to client: {response}")

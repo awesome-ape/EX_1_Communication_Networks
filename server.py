@@ -34,16 +34,17 @@ def main():
         # check if domain exists in zone
         if domain in zone:
             rec_type, ip = zone[domain]
-            response = f"{rec_type},{ip},{domain}"
+            response = f"{domain},{ip},{rec_type}"
 
         # NS
         # if domain not found, check for NS records for parent domains
         else:
             for z_domain, (rec_type, ip) in zone.items():
                 if rec_type == "NS" and domain.endswith(z_domain.strip('.')):
-                    response = f"NS,{ip},{z_domain}"
+                    response = f"{z_domain},{ip},NS"
                     break
 
+        # print(response)
         s.sendto(response.encode(), addr)
 
 if __name__ == "__main__":
